@@ -1,34 +1,26 @@
 import Link from "next/link";
+import type { EventSummary } from "@/types/event";
 
-export type Event = {
-  id: string;
-  title: string;
-  restaurant: string;
-  date: string;
-  area: string;
-  budget: string;
-  currentMembers: number;
-  maxMembers: number;
-  status: "recruiting" | "last-spot" | "confirmed";
-};
-
-const statusConfig = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   recruiting: {
     label: "募集中",
     className: "bg-green-100 text-green-700",
-  },
-  "last-spot": {
-    label: "残り1枠",
-    className: "bg-yellow-100 text-yellow-700",
   },
   confirmed: {
     label: "確定",
     className: "bg-gray-200 text-gray-600",
   },
+  completed: {
+    label: "開催済み",
+    className: "bg-gray-100 text-gray-500",
+  },
 };
 
-export default function EventCard({ event }: { event: Event }) {
-  const status = statusConfig[event.status];
+export default function EventCard({ event }: { event: EventSummary }) {
+  const status = statusConfig[event.status] ?? statusConfig.recruiting;
+  const isLastSpot =
+    event.status === "recruiting" &&
+    event.maxMembers - event.currentMembers === 1;
 
   return (
     <Link
@@ -36,11 +28,17 @@ export default function EventCard({ event }: { event: Event }) {
       className="block bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition cursor-pointer"
     >
       <div className="flex justify-between items-start mb-3">
-        <span
-          className={`${status.className} text-xs font-bold px-2.5 py-1 rounded-full`}
-        >
-          {status.label}
-        </span>
+        {isLastSpot ? (
+          <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-1 rounded-full">
+            残り1枠
+          </span>
+        ) : (
+          <span
+            className={`${status.className} text-xs font-bold px-2.5 py-1 rounded-full`}
+          >
+            {status.label}
+          </span>
+        )}
         <span className="text-xs text-gray-400">{event.date}</span>
       </div>
       <h3 className="font-bold text-gray-800 mb-1">{event.title}</h3>
