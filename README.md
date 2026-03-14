@@ -10,3 +10,16 @@
 | [PRD.md](docs/PRD.md) | 要件定義書 — システム全体の要件定義（機能要件・非機能要件・技術仕様を含む） |
 | [screen-transition.md](docs/screen-transition.md) | 画面遷移図 — 全画面の遷移フローと認証要件（Mermaid図付き） |
 
+## 画面モック
+
+`mockups/index.html` をブラウザで開くと、全画面のインタラクティブなモックを確認できます。
+
+```bash
+open mockups/index.html
+```
+
+- **Tailwind CSS** を使用（CDN読み込み）
+- 全13画面をJavaScriptで画面遷移シミュレーション
+- 未ログイン／ログイン済みの状態切り替え対応
+- 右下の「🎛 画面切替」パネルから任意の画面にジャンプ可能
+
