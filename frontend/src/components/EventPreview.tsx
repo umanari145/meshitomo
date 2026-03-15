@@ -1,18 +1,27 @@
 import Link from "next/link";
 import EventCard from "./EventCard";
+import { sampleEvents } from "@/lib/sample-events";
 import type { EventSummary } from "@/types/event";
 
-async function fetchEvents(): Promise<EventSummary[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/events?status=recruiting`, {
-    cache: "no-store",
-  });
-  const data = await res.json();
-  return (data.events as EventSummary[]).slice(0, 3);
+function getRecruitingEvents(): EventSummary[] {
+  return sampleEvents
+    .filter((e) => e.status === "recruiting")
+    .slice(0, 3)
+    .map((e) => ({
+      id: e.id,
+      title: e.title,
+      restaurant: e.restaurant,
+      date: e.date,
+      area: e.area,
+      budget: e.budget,
+      currentMembers: e.currentMembers,
+      maxMembers: e.maxMembers,
+      status: e.status,
+    }));
 }
 
-export default async function EventPreview() {
-  const events = await fetchEvents();
+export default function EventPreview() {
+  const events = getRecruitingEvents();
 
   return (
     <section className="bg-gray-50">
