@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ============================================================
+// ユーザー管理 (U-001 ~ U-015)
+// ============================================================
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  hashedPassword String
+  birthDate      DateTime
+  nickname       String
+  ageGroup       String   // 20代 / 30代 / 40代 / 50代以上
+  gender         String   // 男性 / 女性 / その他
+  foodPreference String   // ガッツリ系 / 軽め / とにかく飲む
+  trustScore     Float    @default(5.0) // T-001
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  hostedEvents      Event[]              @relation("HostedEvents")
+  participations    Participant[]
+  reportsFiled      Report[]             @relation("ReportsFiled")
+  reportsReceived   Report[]             @relation("ReportsReceived")
+  blocksInitiated   Block[]              @relation("BlocksInitiated")
+  blocksReceived    Block[]              @relation("BlocksReceived")
+  attendanceGiven   AttendanceReport[]   @relation("AttendanceGiven")
+  attendanceAbout   AttendanceReport[]   @relation("AttendanceAbout")
+
+  @@map("users")
+}
+
+// ============================================================
+// イベント管理 (E-001 ~ E-033)
+// ============================================================
+model Event {
+  id             String      @id @default(uuid())
+  title          String
+  date           DateTime
+  time           String      // "19:00" 等
+  restaurantName String
+  address        String
+  prefecture     String      // 都道府県
+  area           String      // エリア（新宿、渋谷 等）
+  category       String      // 大カテゴリ
+  subCategory    String?     // サブカテゴリ
+  budgetMin      Int         // 最低予算（円）
+  budgetMax      Int         // 最高予算（円）
+  maxMembers     Int         // 募集人数 (3~5)
+  genderFilter   String      // anyone / same / male / female
+  status         EventStatus @default(RECRUITING) // E-030
+
+  hostId String
+  host   User   @relation("HostedEvents", fields: [hostId], references: [id])
+
+  participants     Participant[]
+  attendanceReports AttendanceReport[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([prefecture, area])
+  @@index([category])
+  @@index([date])
+  @@map("events")
+}
+
+enum EventStatus {
+  RECRUITING // 募集中
+  CONFIRMED  // 確定（定員到達）
+  COMPLETED  // 開催済み
+  CANCELLED  // キャンセル
+}
+
+// ============================================================
+// イベント参加 (E-020 ~ E-024)
+// ============================================================
+model Participant {
+  id      String @id @default(uuid())
+  eventId String
+  userId  String
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@map("participants")
+}
+
+// ============================================================
+// 出欠報告 (T-002 ~ T-004)
+// ============================================================
+model AttendanceReport {
+  id         String  @id @default(uuid())
+  eventId    String
+  reporterId String  // 報告者
+  targetId   String  // 報告対象ユーザー
+  attended   Boolean // true=出席, false=欠席（ドタキャン）
+
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reporter User  @relation("AttendanceGiven", fields: [reporterId], references: [id])
+  target   User  @relation("AttendanceAbout", fields: [targetId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, reporterId, targetId])
+  @@map("attendance_reports")
+}
+
+// ============================================================
+// 通報 (SF-001, SF-004)
+// ============================================================
+model Report {
+  id           String @id @default(uuid())
+  reporterId   String
+  targetUserId String
+  reason       String // 不適切な内容 / スパム / 嫌がらせ / その他
+  detail       String? @db.Text
+
+  reporter   User @relation("ReportsFiled", fields: [reporterId], references: [id])
+  targetUser User @relation("ReportsReceived", fields: [targetUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("reports")
+}
+
+// ============================================================
+// ブロック (SF-002, SF-003)
+// ============================================================
+model Block {
+  id        String @id @default(uuid())
+  blockerId String
+  blockedId String
+
+  blocker User @relation("BlocksInitiated", fields: [blockerId], references: [id])
+  blocked User @relation("BlocksReceived", fields: [blockedId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocks")
+}
