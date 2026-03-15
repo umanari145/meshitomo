@@ -54,6 +54,20 @@ docker compose down -v
 | phpMyAdmin | http://localhost:8080 |
 | MySQL | `localhost:3306` |
 
+## npm scripts（`frontend/package.json`）
+
+| スクリプト | コマンド | 説明 |
+|-----------|---------|------|
+| `dev` | `next dev` | 開発サーバーを起動（ホットリロード対応） |
+| `build` | `prisma generate && next build` | ローカル用ビルド。Prismaクライアント生成 → Next.jsビルド |
+| `build:vercel` | `prisma generate && prisma migrate deploy && next build` | Vercelデプロイ用。本番DBへのマイグレーション適用を含む |
+| `postinstall` | `prisma generate` | `npm install` 後に自動実行。Prismaクライアントを生成 |
+| `start` | `next start` | 本番サーバーを起動（`build` 後に使用） |
+| `lint` | `eslint` | コードのリント実行 |
+| `prisma:generate` | `prisma generate` | Prismaクライアントを手動で再生成 |
+| `prisma:migrate` | `prisma migrate dev` | 開発環境用マイグレーション（新規作成＋適用） |
+| `prisma:studio` | `prisma studio` | ブラウザでDBのデータを閲覧・編集 |
+
 ## コマンド一覧
 
 ### Prisma（DB操作）
