@@ -60,13 +60,14 @@ docker compose down -v
 |-----------|---------|------|
 | `dev` | `next dev` | 開発サーバーを起動（ホットリロード対応） |
 | `build` | `prisma generate && next build` | ローカル用ビルド。Prismaクライアント生成 → Next.jsビルド |
-| `build:vercel` | `prisma generate && prisma migrate deploy && next build` | Vercelデプロイ用。本番DBへのマイグレーション適用を含む |
-| `postinstall` | `prisma generate` | `npm install` 後に自動実行。Prismaクライアントを生成 |
+| `build:vercel` | `prisma generate && prisma migrate deploy && prisma db seed && next build` | Vercelデプロイ用。マイグレーション適用 → seed投入 → ビルド |
+| `postinstall` | `prisma generate` | `npm install` 後に自動実行。Prismaクライアントを生成（Dockerではスキップ） |
 | `start` | `next start` | 本番サーバーを起動（`build` 後に使用） |
 | `lint` | `eslint` | コードのリント実行 |
 | `prisma:generate` | `prisma generate` | Prismaクライアントを手動で再生成 |
 | `prisma:migrate` | `prisma migrate dev` | 開発環境用マイグレーション（新規作成＋適用） |
 | `prisma:studio` | `prisma studio` | ブラウザでDBのデータを閲覧・編集 |
+| `prisma:seed` | `prisma db seed` | CSVからサンプルデータをDBに投入（upsertのため何度でも安全） |
 
 ## コマンド一覧
 
@@ -166,6 +167,7 @@ docker compose exec db mysql -u meshitomo -p'Meshi_t0m0!' meshitomo
 | [URD.md](docs/URD.md) | ユーザー要件定義書 — ユーザー視点の機能要件（登録・イベント管理・検索・信頼スコア・安全対策など） |
 | [PRD.md](docs/PRD.md) | 要件定義書 — システム全体の要件定義（機能要件・非機能要件・技術仕様を含む） |
 | [screen-transition.md](docs/screen-transition.md) | 画面遷移図 — 全画面の遷移フローと認証要件（Mermaid図付き） |
+| [api.md](docs/api.md) | ルーティング・API一覧 — 実装済みページとAPIエンドポイントの仕様 |
 
 ## 画面モック
 
