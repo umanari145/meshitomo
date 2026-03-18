@@ -1,0 +1,10 @@
+email,hashedPassword,birthDate,nickname,ageGroup,gender,foodPreference,trustScore
+takeshi@example.com,dummy_hash,1993-05-10,たけし,30代,男性,ガッツリ系,4.8
+ayaka@example.com,dummy_hash,2000-08-15,あやか,20代,女性,軽め,5.0
+misaki@example.com,dummy_hash,2001-03-22,みさき,20代,女性,とにかく飲む,4.5
+kenji@example.com,dummy_hash,1982-11-03,けんじ,40代,男性,とにかく飲む,4.2
+yuuki@example.com,dummy_hash,2002-01-20,ゆうき,20代,男性,ガッツリ系,4.6
+haruka@example.com,dummy_hash,2000-07-12,はるか,20代,女性,軽め,4.7
+sakura@example.com,dummy_hash,1992-04-01,さくら,30代,女性,ガッツリ系,4.9
+hiroshi@example.com,dummy_hash,1984-09-30,ひろし,40代,男性,とにかく飲む,4.3
+mai@example.com,dummy_hash,1995-12-25,まい,30代,女性,軽め,4.9

@@ -139,6 +139,16 @@ docker compose exec frontend npm run build
 
 # コンテナ内でリント
 docker compose exec frontend npm run lint
+
+# キャッシュなしで完全にフロントをビルド
+docker compose build --no-cache frontend
+
+# マイグレーション（初回のみ）
+docker compose exec frontend npx prisma migrate dev 
+
+# CSVからseed投入
+docker compose exec frontend npx prisma db seed
+
 ```
 
 ### MySQL に直接接続

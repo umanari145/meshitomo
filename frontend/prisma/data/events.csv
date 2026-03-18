@@ -1,0 +1,6 @@
+title,date,time,restaurantName,address,prefecture,area,category,subCategory,budgetMin,budgetMax,maxMembers,genderFilter,status,hostEmail
+🔥 焼肉食べ放題いきませんか！,2026-03-20,19:00,焼肉きんぐ 新宿西口店,東京都新宿区西新宿1-xx-xx,東京都,新宿,焼肉,ホルモン,3000,4000,4,anyone,RECRUITING,takeshi@example.com
+🍣 回転寿司で飲みましょう,2026-03-22,18:30,スシロー 渋谷駅前店,東京都渋谷区道玄坂2-xx-xx,東京都,渋谷,寿司,回転寿司,2000,3000,3,anyone,RECRUITING,ayaka@example.com
+🍲 火鍋でわいわい飲みたい,2026-03-25,19:30,海底撈火鍋 池袋店,東京都豊島区東池袋1-xx-xx,東京都,池袋,中華,火鍋,4000,5000,5,female,RECRUITING,misaki@example.com
+🍕 イタリアンで女子会,2026-03-28,19:00,サルヴァトーレ クオモ 恵比寿,東京都渋谷区恵比寿南1-xx-xx,東京都,恵比寿,イタリアン,ピザ,5000,6000,5,female,CONFIRMED,mai@example.com
+🍺 大衆酒場でサク飲み,2026-03-21,18:00,もつ焼き でん 新橋店,東京都港区新橋3-xx-xx,東京都,新橋,居酒屋,大衆酒場,2000,3000,4,anyone,RECRUITING,kenji@example.com
