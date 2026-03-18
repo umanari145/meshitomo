@@ -6,6 +6,10 @@ import Features from "@/components/Features";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
+// DBアクセスがあるためビルド時の静的生成(SSG)を行わず、
+// リクエスト時にレンダリング(SSR)する
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <>
