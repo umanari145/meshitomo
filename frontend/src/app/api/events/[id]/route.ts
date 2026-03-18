@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { sampleEvents } from "@/lib/sample-events";
+import { prisma } from "@/lib/prisma";
+import { toEventDetail } from "@/lib/format-event";
 
 /**
  * GET /api/events/:id
@@ -9,7 +10,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const event = sampleEvents.find((e) => e.id === id);
+
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      host: true,
+      participants: { include: { user: true } },
+    },
+  });
 
   if (!event) {
     return NextResponse.json(
@@ -18,5 +26,5 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(event);
+  return NextResponse.json(toEventDetail(event));
 }

@@ -9,6 +9,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+      - ./frontend/prisma:/app/prisma
     environment:
       - WATCHPACK_POLLING=true
       - DATABASE_URL=mysql://meshitomo:Meshi_t0m0!@db:3306/meshitomo

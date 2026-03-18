@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sampleEvents } from "@/lib/sample-events";
-import type { EventSummary } from "@/types/event";
+import { prisma } from "@/lib/prisma";
+import { toEventSummary } from "@/lib/format-event";
 
 /**
  * GET /api/events
@@ -8,7 +8,7 @@ import type { EventSummary } from "@/types/event";
  * クエリパラメータ:
  *   area     - エリアで絞り込み（例: 新宿）
  *   category - カテゴリで絞り込み（例: 焼肉）
- *   status   - ステータスで絞り込み（recruiting / confirmed / completed）
+ *   status   - ステータスで絞り込み（RECRUITING / CONFIRMED / COMPLETED）
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -16,29 +16,21 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category");
   const status = searchParams.get("status");
 
-  let filtered = sampleEvents;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: Record<string, any> = {};
+  if (area) where.area = area;
+  if (category) where.category = category;
+  if (status) where.status = status.toUpperCase();
 
-  if (area) {
-    filtered = filtered.filter((e) => e.area === area);
-  }
-  if (category) {
-    filtered = filtered.filter((e) => e.category === category);
-  }
-  if (status) {
-    filtered = filtered.filter((e) => e.status === status);
-  }
+  const events = await prisma.event.findMany({
+    where,
+    include: { _count: { select: { participants: true } } },
+    orderBy: { date: "asc" },
+  });
 
-  const summaries: EventSummary[] = filtered.map((e) => ({
-    id: e.id,
-    title: e.title,
-    restaurant: e.restaurant,
-    date: e.date,
-    area: e.area,
-    budget: e.budget,
-    currentMembers: e.currentMembers,
-    maxMembers: e.maxMembers,
-    status: e.status,
-  }));
+  const summaries = events.map((e: (typeof events)[number]) =>
+    toEventSummary(e)
+  );
 
   return NextResponse.json({
     events: summaries,

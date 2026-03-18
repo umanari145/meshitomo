@@ -1,27 +1,20 @@
 import Link from "next/link";
 import EventCard from "./EventCard";
-import { sampleEvents } from "@/lib/sample-events";
-import type { EventSummary } from "@/types/event";
+import { prisma } from "@/lib/prisma";
+import { toEventSummary, type EventSummaryView } from "@/lib/format-event";
 
-function getRecruitingEvents(): EventSummary[] {
-  return sampleEvents
-    .filter((e) => e.status === "recruiting")
-    .slice(0, 3)
-    .map((e) => ({
-      id: e.id,
-      title: e.title,
-      restaurant: e.restaurant,
-      date: e.date,
-      area: e.area,
-      budget: e.budget,
-      currentMembers: e.currentMembers,
-      maxMembers: e.maxMembers,
-      status: e.status,
-    }));
+async function getRecruitingEvents(): Promise<EventSummaryView[]> {
+  const events = await prisma.event.findMany({
+    where: { status: "RECRUITING" },
+    include: { _count: { select: { participants: true } } },
+    orderBy: { date: "asc" },
+    take: 3,
+  });
+  return events.map((e: (typeof events)[number]) => toEventSummary(e));
 }
 
-export default function EventPreview() {
-  const events = getRecruitingEvents();
+export default async function EventPreview() {
+  const events = await getRecruitingEvents();
 
   return (
     <section className="bg-gray-50">
