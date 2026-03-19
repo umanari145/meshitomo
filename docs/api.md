@@ -8,6 +8,7 @@
 | `/events` | `src/app/events/page.tsx` | イベント一覧ページ（エリア・カテゴリ・ステータスで絞り込み可） | 不要 |
 | `/events/:id` | `src/app/events/[id]/page.tsx` | イベント詳細ページ | 不要（応募のみ必要） |
 | `/login` | `src/app/login/page.tsx` | ログインページ | 不要 |
+| `/register` | `src/app/register/page.tsx` | 新規登録ページ（2ステップ: アカウント情報 → プロフィール） | 不要 |
 
 > **補足**: トップページはDBアクセスがあるため `export const dynamic = "force-dynamic"` を設定し、SSR（リクエスト時レンダリング）で動作します。
 
