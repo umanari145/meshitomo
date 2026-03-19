@@ -5,6 +5,7 @@
 | パス | ファイル | 説明 | ログイン要否 |
 |------|---------|------|------------|
 | `/` | `src/app/page.tsx` | トップページ（イベントプレビュー含む） | 不要 |
+| `/events/:id` | `src/app/events/[id]/page.tsx` | イベント詳細ページ | 不要（応募のみ必要） |
 | `/login` | `src/app/login/page.tsx` | ログインページ | 不要 |
 
 > **補足**: トップページはDBアクセスがあるため `export const dynamic = "force-dynamic"` を設定し、SSR（リクエスト時レンダリング）で動作します。
