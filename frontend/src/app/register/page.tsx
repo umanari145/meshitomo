@@ -2,16 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import type { RegisterResponse } from "@/app/api/auth/register/route";
 
 const AGE_GROUPS = ["20代", "30代", "40代", "50代以上"];
 const GENDERS = ["男性", "女性", "その他"];
 const FOOD_PREFERENCES = ["ガッツリ系", "軽め", "とにかく飲む"];
 
+// 年代から仮の生年月日を生成（YYYY-01-01 形式）
+const AGE_GROUP_BIRTH_YEAR: Record<string, number> = {
+  "20代": 2000,
+  "30代": 1990,
+  "40代": 1980,
+  "50代以上": 1970,
+};
+
 type Step = 1 | 2;
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // ── Step1: アカウント情報 ──
   const [email, setEmail] = useState("");
@@ -40,17 +53,47 @@ export default function RegisterPage() {
     if (canProceed) setStep(2);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 登録APIを呼び出す
-    console.log({
-      email,
-      password,
-      nickname,
-      ageGroup,
-      gender,
-      foodPreference,
-    });
+    if (!canSubmit) return;
+
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      const birthYear = AGE_GROUP_BIRTH_YEAR[ageGroup] ?? 1990;
+      const birthDate = `${birthYear}-01-01`;
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          nickname,
+          ageGroup,
+          gender,
+          foodPreference,
+          birthDate,
+        }),
+      });
+
+      const data = (await res.json()) as RegisterResponse;
+
+      if (!data.ok) {
+        setApiError(data.error);
+        return;
+      }
+
+      // 登録成功 → トップページへリダイレクト（認証実装後はログイン済みページへ）
+      router.push("/?registered=true");
+    } catch {
+      setApiError(
+        "通信エラーが発生しました。しばらく経ってから再試行してください。"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -210,20 +253,38 @@ export default function RegisterPage() {
                     </div>
                   </FormField>
 
+                  {/* APIエラーメッセージ */}
+                  {apiError && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">
+                      {apiError}
+                    </div>
+                  )}
+
                   <div className="flex gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
-                      className="flex-1 border border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold py-3 rounded-lg transition"
+                      onClick={() => {
+                        setStep(1);
+                        setApiError("");
+                      }}
+                      disabled={isLoading}
+                      className="flex-1 border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 font-semibold py-3 rounded-lg transition"
                     >
                       ← 戻る
                     </button>
                     <button
                       type="submit"
-                      disabled={!canSubmit}
-                      className="flex-2 flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3 rounded-lg shadow transition"
+                      disabled={!canSubmit || isLoading}
+                      className="flex-[2] bg-brand-500 hover:bg-brand-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-3 rounded-lg shadow transition flex items-center justify-center gap-2"
                     >
-                      登録する
+                      {isLoading ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          登録中...
+                        </>
+                      ) : (
+                        "登録する"
+                      )}
                     </button>
                   </div>
                 </form>
