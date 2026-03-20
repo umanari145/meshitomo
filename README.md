@@ -158,6 +158,56 @@ docker compose exec frontend npx prisma db seed
 docker compose exec db mysql -u meshitomo -p'Meshi_t0m0!' meshitomo
 ```
 
+## 認証方式の設計判断
+
+### セッション管理に JWT を採用した理由
+
+ログイン状態の管理には **JWT（JSON Web Token）を httpOnly Cookie に保存する方式** を採用しています。
+
+#### Vercel（サーバーレス）との相性
+
+Vercel はリクエストごとに異なるサーバーインスタンスで処理される可能性があります。従来の DBセッション方式ではインスタンスをまたいでセッションを共有する仕組みが必要になりますが、JWT はサーバー側に状態を持たないため、どのインスタンスでも秘密鍵さえあれば検証できます。
+
+```
+DBセッション方式（不向き）
+  ユーザー → サーバーA → セッションDB確認 ✅
+  ユーザー → サーバーB → セッションが見つからない ❌
+
+JWT方式（向いている）
+  ユーザー → サーバーA → CookieのJWTを検証するだけ ✅
+  ユーザー → サーバーB → CookieのJWTを検証するだけ ✅
+```
+
+#### 各方式との比較
+
+| 方式 | メリット | デメリット | 採用判断 |
+|------|---------|-----------|---------|
+| **JWT（採用）** | DBアクセス不要・サーバーレス向き | 強制ログアウトが難しい | ✅ 現フェーズに最適 |
+| DBセッション | 即時無効化できる | 毎リクエストDBアクセスが必要 | 現時点ではオーバースペック |
+| NextAuth.js | 機能が豊富・OAuth対応 | 設定が複雑・学習コスト高 | 後から移行可能 |
+
+#### 既知の制限と今後の方針
+
+- **強制ログアウトが難しい**: 発行済みトークンを途中で無効化できない（有効期限7日）
+- ブロック機能やアカウント停止が必要になった時点で、NextAuth.js への移行またはDBセッション方式の追加を検討する
+
+#### 関連ファイル
+
+| ファイル | 役割 |
+|---------|------|
+| `src/lib/session.ts` | JWTの署名・検証・Cookie操作ユーティリティ |
+| `src/app/api/auth/login/route.ts` | ログインAPI（bcrypt照合 → Cookie発行） |
+| `src/app/api/auth/logout/route.ts` | ログアウトAPI（Cookieを削除） |
+| `src/components/Header.tsx` | 非同期 Server Component（Cookie読み取り → 表示切替） |
+
+#### 必要な環境変数
+
+```bash
+SESSION_SECRET=your-random-secret-key-here  # JWT署名に使う秘密鍵（本番では十分にランダムな値を設定）
+```
+
+---
+
 ## ドキュメント
 
 `docs/` フォルダに設計ドキュメントを格納しています。
