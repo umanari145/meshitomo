@@ -37,10 +37,14 @@ export default function RegisterPage() {
   const [gender, setGender] = useState("");
   const [foodPreference, setFoodPreference] = useState("");
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailInvalid = email !== "" && !emailRegex.test(email);
+
   const passwordMismatch =
     passwordConfirm !== "" && password !== passwordConfirm;
 
-  const canProceed = email !== "" && password.length >= 8 && !passwordMismatch;
+  const canProceed =
+    email !== "" && !emailInvalid && password.length >= 8 && !passwordMismatch;
 
   const canSubmit =
     nickname !== "" &&
@@ -130,8 +134,15 @@ export default function RegisterPage() {
                       autoComplete="email"
                       placeholder="example@email.com"
                       required
-                      className={inputClass}
+                      className={`${inputClass} ${
+                        emailInvalid ? "border-red-400 focus:ring-red-400" : ""
+                      }`}
                     />
+                    {emailInvalid && (
+                      <p className="text-xs text-red-500 mt-1">
+                        メールアドレスの形式が正しくありません
+                      </p>
+                    )}
                   </FormField>
 
                   <FormField label="パスワード" hint="8文字以上">
