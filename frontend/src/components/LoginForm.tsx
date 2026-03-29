@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const inputClass =
   "w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition";
 
+function safeRedirectPath(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/";
+  return raw;
+}
+
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const afterLoginPath = safeRedirectPath(searchParams.get("redirect"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -33,11 +40,11 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/");
+      router.push(afterLoginPath);
       router.refresh();
     } catch {
       setError(
-        "通信エラーが発生しました。しばらく経ってから再試行してください。"
+        "通信エラーが発生しました。しばらく経ってから再試行してください。",
       );
     } finally {
       setIsLoading(false);

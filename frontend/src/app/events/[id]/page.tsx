@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EventApplySection from "@/components/EventApplySection";
 import { prisma } from "@/lib/prisma";
 import { toEventDetail } from "@/lib/format-event";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,25 @@ export default async function EventDetailPage({
   const event = await getEvent(id);
 
   if (!event) notFound();
+
+  const session = await getSession();
+  let applyBlockedReason: "host" | "already" | null = null;
+  if (session) {
+    const ctx = await prisma.event.findUnique({
+      where: { id },
+      select: {
+        hostId: true,
+        participants: {
+          where: { userId: session.userId },
+          select: { id: true },
+        },
+      },
+    });
+    if (ctx) {
+      if (ctx.hostId === session.userId) applyBlockedReason = "host";
+      else if (ctx.participants.length > 0) applyBlockedReason = "already";
+    }
+  }
 
   const status = statusConfig[event.status] ?? statusConfig.recruiting;
   const isRecruiting = event.status === "recruiting";
@@ -222,17 +243,12 @@ export default async function EventDetailPage({
               {/* 応募ボタンエリア */}
               <div className="border-t border-gray-100 pt-6">
                 {isRecruiting && !isFull ? (
-                  <div className="text-center">
-                    <Link
-                      href="/login"
-                      className="inline-block w-full md:w-auto bg-brand-500 hover:bg-brand-600 text-white font-bold text-lg px-12 py-4 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition"
-                    >
-                      このイベントに応募する
-                    </Link>
-                    <p className="text-xs text-gray-400 mt-3">
-                      応募にはログインが必要です
-                    </p>
-                  </div>
+                  <EventApplySection
+                    eventId={id}
+                    isLoggedIn={Boolean(session)}
+                    loginRedirectPath={`/events/${id}`}
+                    blockedReason={applyBlockedReason}
+                  />
                 ) : (
                   <div className="text-center py-2">
                     <p className="text-gray-400 font-medium">
