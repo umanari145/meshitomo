@@ -63,7 +63,7 @@ function mapStatus(status: string): string {
 
 export function toEventSummary(
   event: PrismaEvent & { _count?: { participants: number } },
-  participantCount?: number
+  participantCount?: number,
 ): EventSummaryView {
   const count = participantCount ?? event._count?.participants ?? 0;
   return {

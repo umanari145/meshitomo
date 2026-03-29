@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { createSession } from "@/lib/session";
 
 export type RegisterRequest = {
   email: string;
@@ -17,7 +18,7 @@ export type RegisterResponse =
   | { ok: false; error: string };
 
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<RegisterResponse>> {
   const body = (await req.json()) as Partial<RegisterRequest>;
 
@@ -43,14 +44,14 @@ export async function POST(
   ) {
     return NextResponse.json(
       { ok: false, error: "必須項目が不足しています" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (password.length < 8) {
     return NextResponse.json(
       { ok: false, error: "パスワードは8文字以上で設定してください" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -58,7 +59,7 @@ export async function POST(
   if (!emailRegex.test(email)) {
     return NextResponse.json(
       { ok: false, error: "メールアドレスの形式が正しくありません" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -67,7 +68,7 @@ export async function POST(
   if (existing) {
     return NextResponse.json(
       { ok: false, error: "このメールアドレスはすでに使用されています" },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -87,6 +88,9 @@ export async function POST(
       birthDate: new Date(birthDate),
     },
   });
+
+  // ── セッションCookieを発行 ───────────────────────────────────────
+  await createSession({ userId: user.id, nickname: user.nickname });
 
   return NextResponse.json({ ok: true, userId: user.id }, { status: 201 });
 }
